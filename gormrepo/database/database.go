@@ -20,7 +20,7 @@ func InitDatabase() (*gorm.DB, error) {
 			Colorful:                  true,
 		},
 	)
-	db, err := gorm.Open(sqlite.Open("gorm.db"), &gorm.Config{Logger: newLogger})
+	db, err := gorm.Open(sqlite.Open("chino.db"), &gorm.Config{Logger: newLogger})
 	if err != nil {
 		return nil, err
 	}
