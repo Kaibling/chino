@@ -51,8 +51,8 @@ func (i *MovieRepo) ReadByName(name string) (*models.Movie, error) {
 
 func (i *MovieRepo) ReadUntil(months int) ([]models.Movie, error) {
 	movies := []Movie{}
-	//res := i.db.Where("release_date >= ? and release_date <= ?", time.Now(), time.Now().Add(time.Duration(months)*time.Hour*24*30)).Find(&movies)
-	res := i.db.Find(&movies)
+	res := i.db.Where("release_date >= ? and release_date <= ?", time.Now(), time.Now().Add(time.Duration(months)*time.Hour*24*30)).Find(&movies)
+	//res := i.db.Find(&movies)
 	if res.Error != nil {
 		return nil, res.Error
 	}
@@ -67,12 +67,7 @@ func (i *MovieRepo) Create(m models.Movie) (*models.Movie, error) {
 	ru := movieUnmarshal(*newMovie)
 	return ru, nil
 }
-func (i *MovieRepo) UpdateByID(id int, m models.Movie) (*models.Movie, error) {
-	panic("not implemented")
-}
-func (i *MovieRepo) DeleteByID(id int) error {
-	panic("not implemented")
-}
+
 func (i *MovieRepo) DeleteByName(name string) error {
 	res := i.db.Delete(&Movie{}, "name = ?", name)
 	if res.Error != nil {

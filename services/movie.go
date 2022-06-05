@@ -11,12 +11,10 @@ import (
 
 type movieRepo interface {
 	ReadAll() ([]models.Movie, error)
-	ReadByID(id int) (*models.Movie, error)
 	ReadByName(name string) (*models.Movie, error)
 	ReadUntil(months int) ([]models.Movie, error)
 	Create(models.Movie) (*models.Movie, error)
 	SetNotified(name string) error
-	DeleteByID(id int) error
 	DeleteByName(name string) error
 }
 
@@ -35,9 +33,6 @@ func (s *MovieService) AddNotificationService(n *NotificationService) {
 func (s *MovieService) ReadAll() ([]models.Movie, error) {
 	return s.repo.ReadAll()
 }
-func (s *MovieService) ReadByID(id int) (*models.Movie, error) {
-	return s.repo.ReadByID(id)
-}
 func (s *MovieService) ReadByName(name string) (*models.Movie, error) {
 	return s.repo.ReadByName(name)
 }
@@ -46,9 +41,6 @@ func (s *MovieService) Create(m models.Movie) (*models.Movie, error) {
 	return s.repo.Create(m)
 }
 
-func (s *MovieService) DeleteByID(id int) error {
-	return s.repo.DeleteByID(id)
-}
 func (s *MovieService) DeleteByName(name string) error {
 	return s.repo.DeleteByName(name)
 }

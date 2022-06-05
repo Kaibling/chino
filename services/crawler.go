@@ -16,8 +16,3 @@ func NewCrawlerService(c crawler.Crawler) *CrawlerService {
 func (s *CrawlerService) GetMovies(m int) ([]models.Movie, error) {
 	return s.c.GetMovies(m)
 }
-
-// func (s *CrawlerService) UpdateMovies() error {
-// 	// get movies
-// 	// update existing
-// }

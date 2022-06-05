@@ -36,20 +36,6 @@ func create(w http.ResponseWriter, r *http.Request) {
 	render.Respond(w, r, m)
 }
 
-// func readAllSaved(w http.ResponseWriter, r *http.Request) {
-// 	rs, _ := prepare(r)
-// 	objects, err := rs.ReadAll()
-// 	if err != nil {
-// 		fmt.Println(err.Error())
-// 		return
-// 	}
-// 	render.Respond(w, r, objects)
-// }
-
-// func update(w http.ResponseWriter, r *http.Request) {
-// 	w.Write([]byte("update"))
-// }
-
 func delete(w http.ResponseWriter, r *http.Request) {
 	encName := chi.URLParam(r, "name")
 	name, err := url.QueryUnescape(encName)
@@ -67,19 +53,3 @@ func delete(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Write([]byte("delete"))
 }
-
-// func readAll(w http.ResponseWriter, r *http.Request) {
-// 	ms, cs := prepare(r)
-// 	objects, err := cs.GetMovies(1)
-// 	if err != nil {
-// 		fmt.Println(err.Error())
-// 		return
-// 	}
-// 	favorites, err := ms.ReadUntil(1)
-// 	if err != nil {
-// 		fmt.Println(err.Error())
-// 		return
-// 	}
-// 	movieList := ms.FavoriteMovies(favorites, objects)
-// 	render.Respond(w, r, movieList)
-// }

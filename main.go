@@ -15,14 +15,6 @@ import (
 
 func main() {
 
-	// crawler := uncut.NewCrawler()
-	// cs := services.NewCrawlerService(crawler)
-	// m, err := cs.GetMovies(3)
-	// if err != nil {
-	// 	fmt.Println(err.Error())
-	// }
-	// fmt.Println(m)
-
 	db, err := database.InitDatabase()
 	if err != nil {
 		fmt.Println(err.Error())
@@ -37,8 +29,6 @@ func main() {
 	notificationService := services.NewNotificationService(notifier)
 	movieService.AddNotificationService(notificationService)
 	schedulerService := services.NewSchedulerService(movieService)
-
-	//cancel := schedulerService.Start(5*time.Second, func() error { fmt.Println("hiho"); return nil })
 	cancel := schedulerService.Start(5 * time.Second)
 
 	c := make(chan os.Signal, 1)

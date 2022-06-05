@@ -28,10 +28,5 @@ func show(w http.ResponseWriter, r *http.Request) {
 	}
 	movieList := ms.FavoriteMovies(favorites, objects)
 	tmpl := template.Must(template.ParseFiles("api/dashboard/dashboard.html"))
-
-	//response := transmission.GetResponse(r)
-	//s := rHandler.ShowStatus()
-	//w.Header().Set("Content-Type", "application/json")
-	//response.Send(s)
 	tmpl.Execute(w, movieList)
 }

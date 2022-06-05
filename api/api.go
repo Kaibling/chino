@@ -32,15 +32,8 @@ func NewServer(db *gorm.DB, done chan bool) {
 		r.Mount("/movies", movies.BuildRoute())
 		r.Mount("/dashboard", dashboard.BuildRoute())
 	})
-	//fmt.Println("listening on 3000")
-	// err := http.ListenAndServe(":3000", r)
-	// if err != nil {
-	// 	fmt.Println(err.Error())
-	// }
 	server := http.Server{Addr: ":3333", Handler: r}
 	serverCtx, serverStopCtx := context.WithCancel(context.Background())
-	// done := make(chan bool, 1)
-	// //signal.Notify(sig, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	go func() {
 		<-done
 		fmt.Println("shutown api server")
@@ -66,13 +59,8 @@ func NewServer(db *gorm.DB, done chan bool) {
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-	// // Run the server
-	// go server.ListenAndServe() // TODO get errror
-	// if err != nil && err != http.ErrServerClosed {
-	// 	log.Fatal(err)
-	// }
 
-	return // done
+	return
 }
 
 func injectData(key string, data interface{}) func(next http.Handler) http.Handler {
