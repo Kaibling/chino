@@ -1,0 +1,78 @@
+<html>
+  <head>
+       
+    <style>
+    #movies {
+      font-family: Arial, Helvetica, sans-serif;
+      border-collapse: collapse;
+      width: 100%;
+    }
+    
+    #movies td, #movies th {
+      border: 1px solid #ddd;
+      padding: 8px;
+    }
+    
+    #movies tr:nth-child(even){background-color: #f2f2f2;}
+    
+    #movies tr:hover {background-color: #ddd;}
+    
+    #movies th {
+      padding-top: 12px;
+      padding-bottom: 12px;
+      text-align: left;
+      background-color: #31c0e8;
+      color: white;
+    }
+    </style>
+            <script type="text/javascript">
+              function setFavorite(moviename,genre,date) {
+                  var xhr = new XMLHttpRequest();
+                  xhr.onreadystatechange = function () {
+                      if (xhr.readyState === 4) {
+                          //alert(xhr.response); TODO error handling
+                          location.reload(); 
+                      }
+                  }
+                  xhr.open('Post', '/movies', true);
+                  xhr.setRequestHeader('Content-Type', 'application/json');
+                  var postdata = {"name": moviename,"genre":genre,"release_date":date};
+                  xhr.send(JSON.stringify(postdata));
+              }
+              function unFavorite(moviename) {
+                  var xhr = new XMLHttpRequest();
+                  xhr.onreadystatechange = function () {
+                      if (xhr.readyState === 4) {
+                          //alert(xhr.response); TODO error handling
+                          location.reload(); 
+                      }
+                  }
+                  xhr.open('DELETE', '/movies/'+encodeURIComponent(moviename), true);
+                  xhr.setRequestHeader('Content-Type', 'application/json');
+                  xhr.send();
+              }
+
+    </script>
+    <body>
+        <h1>Movies</h1>
+        <table  id="movies">
+            <tr>
+                <th>Movie</th>
+                <th>Release</th>
+                <th>Genre</th>
+                <th>Favorite</th>
+              </tr>
+              {{ range $movie := . }}
+              <tr>
+                  <td>{{$movie.Name}}</td>
+                  <td>{{$movie.ReleaseDate}}</td>
+                  <td>{{$movie.Genre}}</td>
+                  {{if or (eq $movie.Favorite false)}}
+                  <td><button type="button" onclick='setFavorite("{{$movie.Name}}","{{$movie.Genre}}","{{$movie.ReleaseDate}}")'>fav</button> </td>
+                  {{else}}
+                <td>   <button type="button" onclick='unFavorite("{{$movie.Name}}")'>unfav</button></td>
+                {{end}}
+            </tr>
+            {{end}}
+    </body>
+</html>
