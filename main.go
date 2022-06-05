@@ -29,7 +29,7 @@ func main() {
 	notificationService := services.NewNotificationService(notifier)
 	movieService.AddNotificationService(notificationService)
 	schedulerService := services.NewSchedulerService(movieService)
-	cancel := schedulerService.Start(5 * time.Second)
+	cancel := schedulerService.Start(5 * time.Hour * 24)
 
 	c := make(chan os.Signal, 1)
 	apiServerDone := make(chan bool, 1)

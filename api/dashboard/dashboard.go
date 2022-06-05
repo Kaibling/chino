@@ -5,7 +5,9 @@ import (
 	"chino/services"
 	"fmt"
 	"net/http"
+	"strconv"
 	"text/template"
+	"time"
 )
 
 var prepare = func(r *http.Request) (*services.MovieService, *services.CrawlerService) {
@@ -16,12 +18,27 @@ var prepare = func(r *http.Request) (*services.MovieService, *services.CrawlerSe
 
 func show(w http.ResponseWriter, r *http.Request) {
 	ms, cs := prepare(r)
-	objects, err := cs.GetMovies(1)
+	var month int
+	key, ok := r.URL.Query()["month"]
+	if !ok {
+		_, m, _ := time.Now().Date()
+		month = int(m)
+
+	} else {
+		m, err := strconv.Atoi(key[0])
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
+		month = m
+	}
+
+	objects, err := cs.GetMovies(month)
 	if err != nil {
 		fmt.Println(err.Error())
 		return
 	}
-	favorites, err := ms.ReadUntil(1)
+	favorites, err := ms.ReadUntil(month)
 	if err != nil {
 		fmt.Println(err.Error())
 		return

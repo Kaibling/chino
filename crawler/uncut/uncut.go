@@ -2,10 +2,12 @@ package uncut
 
 import (
 	"bytes"
+	"chino/lib/logging"
 	"chino/lib/utils"
 	"chino/models"
 	"fmt"
 	"log"
+	"strconv"
 	"strings"
 	"time"
 
@@ -20,11 +22,36 @@ func NewCrawler() *uncut {
 }
 
 func (s *uncut) GetMovies(months int) ([]models.Movie, error) {
+	year, _, _ := time.Now().AddDate(0, months, 0).Date()
+	currentYear, _, _ := time.Now().Date()
+	diff := year - currentYear
 	movies := []models.Movie{}
-	year := "2022"
-	// TODO months to years
-	url := "https://www.uncut.at/movies/jahr.php?country=AT&year=" + year
+	for i := 0; i <= diff; i++ {
+		y := strconv.Itoa(currentYear + i)
+		moviesPerYear, err := getYear(y, months)
+		if err != nil {
+			return nil, err
+		}
+		movies = append(movies, moviesPerYear...)
+	}
+	return movies, nil
+}
 
+func timeParse(date string) time.Time {
+
+	layout := "02.01.2006"
+	date = strings.ReplaceAll(date, " ", "")
+	t, err := time.Parse(layout, date)
+	if err != nil {
+		fmt.Println(err)
+	}
+	return t
+}
+
+func getYear(y string, months int) ([]models.Movie, error) {
+	url := "https://www.uncut.at/movies/jahr.php?country=AT&year=" + y
+	movies := []models.Movie{}
+	logging.Logger.Info(url)
 	result, err := utils.Request("GET", url, nil)
 	if err != nil {
 		return nil, err
@@ -43,8 +70,8 @@ func (s *uncut) GetMovies(months int) ([]models.Movie, error) {
 				c := s.Children().Nodes[i]
 				switch i {
 				case 0:
-					rd := timeParse(c.FirstChild.Data + year)
-					if rd.Before(time.Now()) {
+					rd := timeParse(c.FirstChild.Data + y)
+					if rd.Before(time.Now()) || rd.After(time.Now().AddDate(0, months, 0)) {
 						continue
 					}
 					movie.ReleaseDate = utils.TimeToFormat(rd)
@@ -59,17 +86,5 @@ func (s *uncut) GetMovies(months int) ([]models.Movie, error) {
 			}
 		}
 	})
-
 	return movies, nil
-}
-
-func timeParse(date string) time.Time {
-
-	layout := "02.01.2006"
-	date = strings.ReplaceAll(date, " ", "")
-	t, err := time.Parse(layout, date)
-	if err != nil {
-		fmt.Println(err)
-	}
-	return t
 }
