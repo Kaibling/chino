@@ -8,3 +8,5 @@ type Movie struct {
 	Favorite    bool   `json:"favorite"`
 	Notified    bool   `json:"notified"`
 }
+
+type String string

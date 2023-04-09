@@ -2,6 +2,7 @@ package utils
 
 import (
 	"bytes"
+	"chino/models"
 	"io/ioutil"
 	"math/rand"
 	"net/http"
@@ -11,7 +12,6 @@ import (
 )
 
 func Request(method, url string, body []byte) ([]byte, error) {
-
 	data := bytes.NewBuffer(body)
 	r, err := http.NewRequest(method, url, data)
 	if err != nil {
@@ -26,11 +26,10 @@ func Request(method, url string, body []byte) ([]byte, error) {
 
 	rbody, _ := ioutil.ReadAll(response.Body)
 	return rbody, nil
-
 }
 
 func GetContext(key string, r *http.Request) interface{} {
-	parameter := r.Context().Value(key)
+	parameter := r.Context().Value(models.String(key))
 	if parameter == nil {
 		panic("context parameter '" + key + "' missing")
 	}

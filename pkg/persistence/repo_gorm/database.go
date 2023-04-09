@@ -1,4 +1,4 @@
-package database
+package repo_gorm
 
 import (
 	"log"

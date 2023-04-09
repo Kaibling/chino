@@ -1,12 +1,14 @@
 package services
 
 import (
-	"chino/lib/logging"
-	"chino/lib/utils"
-	"chino/models"
+	"context"
 	"errors"
 	"fmt"
 	"time"
+
+	"chino/models"
+	"chino/pkg/log"
+	"chino/pkg/utils"
 )
 
 type movieRepo interface {
@@ -21,11 +23,13 @@ type movieRepo interface {
 type MovieService struct {
 	repo   movieRepo
 	notify *NotificationService
+	ctx    context.Context
 }
 
-func NewMovieService(repo movieRepo) *MovieService {
-	return &MovieService{repo: repo}
+func NewMovieService(ctx context.Context, repo movieRepo) *MovieService {
+	return &MovieService{repo: repo, ctx: ctx}
 }
+
 func (s *MovieService) AddNotificationService(n *NotificationService) {
 	s.notify = n
 }
@@ -33,6 +37,7 @@ func (s *MovieService) AddNotificationService(n *NotificationService) {
 func (s *MovieService) ReadAll() ([]models.Movie, error) {
 	return s.repo.ReadAll()
 }
+
 func (s *MovieService) ReadByName(name string) (*models.Movie, error) {
 	return s.repo.ReadByName(name)
 }
@@ -68,16 +73,23 @@ func (s *MovieService) Run() error {
 	}
 	movies, err := s.repo.ReadAll()
 	if err != nil {
-		logging.Logger.Error(err)
+		log.Error(s.ctx, err)
 	}
 	for i := range movies {
 		t, err := utils.TimeFromFormat(movies[i].ReleaseDate)
 		if err != nil {
-			logging.Logger.Error(err)
+			log.Error(s.ctx, err)
 		}
-		if t.Before(time.Now().AddDate(0, 0, 20)) && !movies[i].Notified {
-			s.notify.Send(fmt.Sprintf("%s will be released at %s", movies[i].Name, movies[i].ReleaseDate))
-			s.repo.SetNotified(movies[i].Name)
+		if t.Before(time.Now().AddDate(0, 0, 10)) && !movies[i].Notified {
+			err := s.notify.Send(fmt.Sprintf("%s will be released at %s", movies[i].Name, movies[i].ReleaseDate))
+			if err != nil {
+				log.Error(s.ctx, err)
+				continue
+			}
+			if err := s.repo.SetNotified(movies[i].Name); err != nil {
+				log.Error(s.ctx, err)
+				continue
+			}
 		}
 	}
 	return nil

@@ -1,7 +1,7 @@
-package gormrepo
+package repo_gorm
 
 import (
-	"chino/lib/utils"
+	"chino/pkg/utils"
 
 	"gorm.io/gorm"
 )
@@ -14,11 +14,11 @@ func Migrate(db *gorm.DB) error {
 	return nil
 }
 
-type DBModel struct {
+type dBModel struct {
 	ID string `gorm:"primaryKey"`
 }
 
-func (db *DBModel) BeforeSave(tx *gorm.DB) (err error) {
+func (db *dBModel) BeforeSave(tx *gorm.DB) (err error) {
 	if db.ID == "" {
 		id := utils.NewULID()
 		db.ID = id.String()

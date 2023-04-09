@@ -2,33 +2,34 @@ package uncut
 
 import (
 	"bytes"
-	"chino/lib/logging"
-	"chino/lib/utils"
-	"chino/models"
-	"fmt"
-	"log"
+	"context"
 	"strconv"
 	"strings"
 	"time"
 
+	"chino/models"
+	"chino/pkg/log"
+	"chino/pkg/utils"
+
 	"github.com/PuerkitoBio/goquery"
 )
 
-type uncut struct {
+type Uncut struct {
+	ctx context.Context
 }
 
-func NewCrawler() *uncut {
-	return &uncut{}
+func NewCrawler(ctx context.Context) *Uncut {
+	return &Uncut{ctx: ctx}
 }
 
-func (s *uncut) GetMovies(months int) ([]models.Movie, error) {
+func (s *Uncut) GetMovies(months int) ([]models.Movie, error) {
 	year, _, _ := time.Now().AddDate(0, months, 0).Date()
 	currentYear, _, _ := time.Now().Date()
 	diff := year - currentYear
 	movies := []models.Movie{}
 	for i := 0; i <= diff; i++ {
 		y := strconv.Itoa(currentYear + i)
-		moviesPerYear, err := getYear(y, months)
+		moviesPerYear, err := getYear(s.ctx, y, months)
 		if err != nil {
 			return nil, err
 		}
@@ -37,21 +38,20 @@ func (s *uncut) GetMovies(months int) ([]models.Movie, error) {
 	return movies, nil
 }
 
-func timeParse(date string) time.Time {
-
+func timeParse(date string) (time.Time, error) {
 	layout := "02.01.2006"
 	date = strings.ReplaceAll(date, " ", "")
 	t, err := time.Parse(layout, date)
 	if err != nil {
-		fmt.Println(err)
+		return time.Time{}, err
 	}
-	return t
+	return t, nil
 }
 
-func getYear(y string, months int) ([]models.Movie, error) {
+func getYear(ctx context.Context, y string, months int) ([]models.Movie, error) {
 	url := "https://www.uncut.at/movies/jahr.php?country=AT&year=" + y
 	movies := []models.Movie{}
-	logging.Logger.Info(url)
+	log.Info(ctx, url)
 	result, err := utils.Request("GET", url, nil)
 	if err != nil {
 		return nil, err
@@ -59,7 +59,7 @@ func getYear(y string, months int) ([]models.Movie, error) {
 	resultBuffer := bytes.NewBuffer(result)
 	doc, err := goquery.NewDocumentFromReader(resultBuffer)
 	if err != nil {
-		log.Fatal(err)
+		log.Error(ctx, err)
 	}
 	tab := doc.Find(".tabelle1")
 	tab.Find("tr").Each(func(i int, s *goquery.Selection) {
@@ -70,7 +70,11 @@ func getYear(y string, months int) ([]models.Movie, error) {
 				c := s.Children().Nodes[i]
 				switch i {
 				case 0:
-					rd := timeParse(c.FirstChild.Data + y)
+					rd, err := timeParse(c.FirstChild.Data + y)
+					if err != nil {
+						log.Error(ctx, err)
+						continue
+					}
 					if rd.Before(time.Now()) || rd.After(time.Now().AddDate(0, months, 0)) {
 						continue
 					}

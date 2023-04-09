@@ -1,0 +1,12 @@
+version: "3.3"
+services:
+ app:
+   build: .
+   container_name: chino_app
+   volumes:
+    - "../.:/work"
+   working_dir: "/work"
+   #entrypoint: "make run"
+   entrypoint: "tail -f /dev/null"
+   ports:
+    - 3000:3000

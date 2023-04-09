@@ -1,23 +1,32 @@
 package dashboard
 
 import (
-	"chino/lib/utils"
-	"chino/services"
-	"fmt"
 	"net/http"
 	"strconv"
 	"text/template"
 	"time"
+
+	"chino/crawler/uncut"
+	"chino/pkg/log"
+	"chino/pkg/persistence/repo_sqlx"
+	"chino/pkg/utils"
+	"chino/services"
+
+	"github.com/jmoiron/sqlx"
 )
 
-var prepare = func(r *http.Request) (*services.MovieService, *services.CrawlerService) {
-	ms := utils.GetContext("movieservice", r).(*services.MovieService)
-	cs := utils.GetContext("crawlerservice", r).(*services.CrawlerService)
+func extract(r *http.Request) (*services.MovieService, *services.CrawlerService) {
+	db := utils.GetContext("db", r).(*sqlx.DB)
+	mr := repo_sqlx.NewMovieRepo(r.Context(), db)
+	ms := services.NewMovieService(r.Context(), mr)
+
+	cr := uncut.NewCrawler(r.Context())
+	cs := services.NewCrawlerService(cr)
 	return ms, cs
 }
 
 func show(w http.ResponseWriter, r *http.Request) {
-	ms, cs := prepare(r)
+	ms, cs := extract(r)
 	var month int
 	key, ok := r.URL.Query()["month"]
 	if !ok {
@@ -27,7 +36,7 @@ func show(w http.ResponseWriter, r *http.Request) {
 	} else {
 		m, err := strconv.Atoi(key[0])
 		if err != nil {
-			fmt.Println(err.Error())
+			log.Error(r.Context(), err)
 			return
 		}
 		month = m
@@ -35,15 +44,17 @@ func show(w http.ResponseWriter, r *http.Request) {
 
 	objects, err := cs.GetMovies(month)
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Error(r.Context(), err)
 		return
 	}
 	favorites, err := ms.ReadUntil(month)
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Error(r.Context(), err)
 		return
 	}
 	movieList := ms.FavoriteMovies(favorites, objects)
 	tmpl := template.Must(template.ParseFiles("api/dashboard/dashboard.html"))
-	tmpl.Execute(w, movieList)
+	if err := tmpl.Execute(w, movieList); err != nil {
+		log.Error(r.Context(), err)
+	}
 }

@@ -1,47 +1,83 @@
 package main
 
 import (
-	"chino/api"
-	"chino/gormrepo"
-	"chino/gormrepo/database"
-	"chino/notification"
-	"chino/services"
+	"context"
 	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"chino/api"
+	"chino/models"
+	"chino/pkg/config"
+	"chino/pkg/log"
+	"chino/pkg/notification"
+	"chino/pkg/persistence/repo_sqlx"
+	"chino/services"
+
+	goflag "flag"
+
+	"github.com/jmoiron/sqlx"
+	flag "github.com/spf13/pflag"
 )
 
-func main() {
+var appVersion string
+var goVersion string
+var buildTime string
 
-	db, err := database.InitDatabase()
+func main() {
+	showVersion := flag.BoolP("version", "v", false, "help app version")
+	flag.CommandLine.AddGoFlagSet(goflag.CommandLine)
+	flag.Parse()
+	if *showVersion {
+		fmt.Printf("app version: %s\n", appVersion)
+		fmt.Printf("go version: %s\n", goVersion)
+		fmt.Printf("build date: %s\n", buildTime)
+		return
+	}
+
+	cfg := config.Init()
+
+	l, err := log.New()
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-	err = gormrepo.Migrate(db)
+	ctx := context.WithValue(context.Background(), models.String("logger"), l)
+
+	db, err := repo_sqlx.InitDatabase(*cfg)
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Error(ctx, err)
+		return
 	}
-	movieRepo := gormrepo.NewMovieRepo(db)
-	movieService := services.NewMovieService(movieRepo)
-	notifier := notification.NewFmtNotifier()
-	notificationService := services.NewNotificationService(notifier)
-	movieService.AddNotificationService(notificationService)
-	schedulerService := services.NewSchedulerService(movieService)
+
+	err = repo_sqlx.InitDB(ctx, db)
+	if err != nil {
+		log.Error(ctx, err)
+	}
+
+	schedulerService := InitScheduler(ctx, db)
 	cancel := schedulerService.Start(5 * time.Hour * 24)
 
 	c := make(chan os.Signal, 1)
 	apiServerDone := make(chan bool, 1)
 	signal.Notify(c, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 
-	go api.NewServer(db, apiServerDone)
+	go api.NewServer(ctx, db, *cfg, l, apiServerDone)
 
 	<-c
 	apiServerDone <- true
 	cancel <- true
-	fmt.Println("closing time")
+	log.Info(ctx, "closing time")
 	time.Sleep(2 * time.Second)
 	os.Exit(1)
+}
 
+func InitScheduler(ctx context.Context, db *sqlx.DB) *services.SchedulerService {
+	movieRepo := repo_sqlx.NewMovieRepo(ctx, db)
+	movieService := services.NewMovieService(ctx, movieRepo)
+	notifier := notification.NewFmtNotifier(ctx)
+	notificationService := services.NewNotificationService(notifier)
+	movieService.AddNotificationService(notificationService)
+	return services.NewSchedulerService(ctx, movieService)
 }

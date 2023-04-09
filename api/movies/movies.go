@@ -1,55 +1,61 @@
 package movies
 
 import (
-	"chino/lib/logging"
-	"chino/lib/utils"
-	"chino/models"
-	"chino/services"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/url"
 
+	"chino/models"
+	"chino/pkg/log"
+	"chino/pkg/persistence/repo_sqlx"
+	"chino/pkg/utils"
+	"chino/services"
+
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/render"
+	"github.com/jmoiron/sqlx"
 )
 
-var prepare = func(r *http.Request) (*services.MovieService, *services.CrawlerService) {
-	ms := utils.GetContext("movieservice", r).(*services.MovieService)
-	cs := utils.GetContext("crawlerservice", r).(*services.CrawlerService)
-	return ms, cs
+func extract(r *http.Request) (*utils.Envelope, *services.MovieService) {
+	envelope := utils.GetContext("envelope", r).(*utils.Envelope)
+
+	db := utils.GetContext("db", r).(*sqlx.DB)
+	mr := repo_sqlx.NewMovieRepo(r.Context(), db)
+	ms := services.NewMovieService(r.Context(), mr)
+	return envelope, ms
 }
 
 func create(w http.ResponseWriter, r *http.Request) {
-	rs, _ := prepare(r)
+	envelope, rs := extract(r)
 	var model models.Movie
 	err := json.NewDecoder(r.Body).Decode(&model)
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Error(r.Context(), err)
+		utils.Render(w, r, envelope.SetError(err))
 		return
 	}
 	m, err := rs.Create(model)
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Error(r.Context(), err)
+		utils.Render(w, r, envelope.SetError(err))
 		return
 	}
-	render.Respond(w, r, m)
+	utils.Render(w, r, envelope.SetResponse(m))
 }
 
 func delete(w http.ResponseWriter, r *http.Request) {
+	envelope, ms := extract(r)
 	encName := chi.URLParam(r, "name")
 	name, err := url.QueryUnescape(encName)
 	if err != nil {
-		logging.Logger.Error(err)
-		w.Write([]byte(err.Error()))
+		log.Error(r.Context(), err)
+		utils.Render(w, r, envelope.SetError(err))
 		return
 	}
-	ms, _ := prepare(r)
 	err = ms.DeleteByName(name)
 	if err != nil {
-		logging.Logger.Error(err)
-		w.Write([]byte(err.Error()))
+		log.Error(r.Context(), err)
+		utils.Render(w, r, envelope.SetError(err))
 		return
 	}
-	w.Write([]byte("delete"))
+	utils.Render(w, r, envelope.SetResponse(""))
 }
