@@ -5,11 +5,11 @@ import (
 	"net/http"
 	"net/url"
 
-	"chino/models"
-	"chino/pkg/log"
-	"chino/pkg/persistence/repo_sqlx"
-	"chino/pkg/utils"
-	"chino/services"
+	"github.com/Kaibling/chino/models"
+	"github.com/Kaibling/chino/pkg/log"
+	"github.com/Kaibling/chino/pkg/persistence/repo_sqlx"
+	"github.com/Kaibling/chino/pkg/utils"
+	"github.com/Kaibling/chino/services"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/jmoiron/sqlx"

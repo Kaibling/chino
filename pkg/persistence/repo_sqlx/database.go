@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"chino/pkg/config"
-	"chino/pkg/log"
+	"github.com/Kaibling/chino/pkg/config"
+	"github.com/Kaibling/chino/pkg/log"
 
 	"github.com/jmoiron/sqlx"
 	_ "modernc.org/sqlite"

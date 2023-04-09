@@ -7,9 +7,9 @@ import (
 	"strings"
 	"time"
 
-	"chino/models"
-	"chino/pkg/log"
-	"chino/pkg/utils"
+	"github.com/Kaibling/chino/models"
+	"github.com/Kaibling/chino/pkg/log"
+	"github.com/Kaibling/chino/pkg/utils"
 
 	"github.com/PuerkitoBio/goquery"
 )

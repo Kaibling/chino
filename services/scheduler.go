@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"chino/pkg/log"
+	"github.com/Kaibling/chino/pkg/log"
 )
 
 type SchedulerObject interface {

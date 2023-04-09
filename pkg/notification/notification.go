@@ -3,7 +3,7 @@ package notification
 import (
 	"context"
 
-	"chino/pkg/log"
+	"github.com/Kaibling/chino/pkg/log"
 )
 
 type FmtNotifier struct {

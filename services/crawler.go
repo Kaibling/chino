@@ -1,8 +1,8 @@
 package services
 
 import (
-	"chino/crawler"
-	"chino/models"
+	"github.com/Kaibling/chino/crawler"
+	"github.com/Kaibling/chino/models"
 )
 
 type CrawlerService struct {

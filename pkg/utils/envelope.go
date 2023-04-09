@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	"chino/pkg/log"
+	"github.com/Kaibling/chino/pkg/log"
 
 	"github.com/go-chi/render"
 )

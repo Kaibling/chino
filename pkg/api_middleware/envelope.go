@@ -4,8 +4,8 @@ import (
 	"context"
 	"net/http"
 
-	"chino/models"
-	"chino/pkg/utils"
+	"github.com/Kaibling/chino/models"
+	"github.com/Kaibling/chino/pkg/utils"
 )
 
 func AddEnvelope(next http.Handler) http.Handler {

@@ -6,11 +6,11 @@ import (
 	"text/template"
 	"time"
 
-	"chino/crawler/uncut"
-	"chino/pkg/log"
-	"chino/pkg/persistence/repo_sqlx"
-	"chino/pkg/utils"
-	"chino/services"
+	"github.com/Kaibling/chino/crawler/uncut"
+	"github.com/Kaibling/chino/pkg/log"
+	"github.com/Kaibling/chino/pkg/persistence/repo_sqlx"
+	"github.com/Kaibling/chino/pkg/utils"
+	"github.com/Kaibling/chino/services"
 
 	"github.com/jmoiron/sqlx"
 )

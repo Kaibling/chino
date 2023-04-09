@@ -2,11 +2,12 @@ package utils
 
 import (
 	"bytes"
-	"chino/models"
 	"io/ioutil"
 	"math/rand"
 	"net/http"
 	"time"
+
+	"github.com/Kaibling/chino/models"
 
 	"github.com/oklog/ulid"
 )

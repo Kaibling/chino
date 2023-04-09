@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"chino/models"
-	"chino/pkg/utils"
+	"github.com/Kaibling/chino/models"
+	"github.com/Kaibling/chino/pkg/utils"
 
 	"github.com/jmoiron/sqlx"
 )

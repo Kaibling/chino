@@ -8,13 +8,13 @@ import (
 	"syscall"
 	"time"
 
-	"chino/api"
-	"chino/models"
-	"chino/pkg/config"
-	"chino/pkg/log"
-	"chino/pkg/notification"
-	"chino/pkg/persistence/repo_sqlx"
-	"chino/services"
+	"github.com/Kaibling/chino/api"
+	"github.com/Kaibling/chino/models"
+	"github.com/Kaibling/chino/pkg/config"
+	"github.com/Kaibling/chino/pkg/log"
+	"github.com/Kaibling/chino/pkg/notification"
+	"github.com/Kaibling/chino/pkg/persistence/repo_sqlx"
+	"github.com/Kaibling/chino/services"
 
 	goflag "flag"
 

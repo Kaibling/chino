@@ -6,16 +6,18 @@ import (
 	"net/http"
 	"time"
 
-	"chino/api/dashboard"
-	"chino/api/movies"
-	"chino/models"
-	"chino/pkg/api_middleware"
-	"chino/pkg/config"
-	"chino/pkg/log"
+	"github.com/Kaibling/chino/api/dashboard"
+	"github.com/Kaibling/chino/api/health"
+	"github.com/Kaibling/chino/api/movies"
+	"github.com/Kaibling/chino/models"
+	"github.com/Kaibling/chino/pkg/api_middleware"
+	"github.com/Kaibling/chino/pkg/config"
+	"github.com/Kaibling/chino/pkg/log"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/jmoiron/sqlx"
+	"moul.io/chizap"
 )
 
 func NewServer(ctx context.Context, db *sqlx.DB, c config.Config, l *log.Logger, done chan bool) {
@@ -23,8 +25,10 @@ func NewServer(ctx context.Context, db *sqlx.DB, c config.Config, l *log.Logger,
 	r := chi.NewRouter()
 
 	r.Use(injectData("logger", l))
-	// TODO middleware logger
-	r.Use(middleware.Logger)
+	r.Use(chizap.New(l.Raw(), &chizap.Opts{
+		WithReferer:   true,
+		WithUserAgent: true,
+	}))
 	r.Use(middleware.Recoverer)
 
 	r.Use(injectData("db", db))
@@ -32,6 +36,7 @@ func NewServer(ctx context.Context, db *sqlx.DB, c config.Config, l *log.Logger,
 	r.Route("/", func(r chi.Router) {
 		r.Mount("/movies", movies.BuildRoute())
 		r.Mount("/dashboard", dashboard.BuildRoute())
+		r.Mount("/health", health.BuildRoute())
 	})
 	server := http.Server{Addr: listeningStr, Handler: r}
 	serverCtx, serverStopCtx := context.WithCancel(context.Background())

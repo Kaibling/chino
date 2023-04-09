@@ -1,8 +1,9 @@
 package log
 
 import (
-	"chino/models"
 	"context"
+
+	"github.com/Kaibling/chino/models"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"

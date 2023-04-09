@@ -1,7 +1,7 @@
 package repo_gorm
 
 import (
-	"chino/pkg/utils"
+	"github.com/Kaibling/chino/pkg/utils"
 
 	"gorm.io/gorm"
 )

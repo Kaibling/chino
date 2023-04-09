@@ -10,3 +10,13 @@ type Movie struct {
 }
 
 type String string
+
+type MemoryCheck struct {
+	Alloc      string `json:"alloc"`
+	TotalAlloc string `json:"total_alloc"`
+	Sys        string `json:"sys"`
+	NumGC      string `json:"num_gc"`
+}
+
+type HealthCheck struct {
+}
